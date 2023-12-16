@@ -2,12 +2,13 @@
 
 import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
+import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 export class ShellTools {
-
     /**
-     * 
-     * @param {Extension} extension 
+     *
+     * @param {Extension} extension
      */
     constructor(extension) {
         this.extension = extension;
@@ -16,8 +17,25 @@ export class ShellTools {
         this.PKEXEC = GLib.find_program_in_path('pkexec');
     }
 
+    _showNotification(title, message, btnText, btnAction) {
+        if (this._notifSource == null) {
+            // We have to prepare this only once
+            this._notifSource = new MessageTray.SystemNotificationSource();
+            // Take care of note leaving unneeded sources
+            this._notifSource.connect('destroy', () => {
+                this._notifSource = null;
+            });
+            Main.messageTray.add(this._notifSource);
+        }
+        let notification = null;
+        notification = new MessageTray.Notification(this._notifSource, title, message);
+        if (btnText) notification.addAction(btnText, btnAction.bind(this));
+        notification.setTransient(true);
+        this._notifSource.showNotification(notification);
+    }
+
     runScreenpadTool(pkexecNeeded, ...params) {
-        return this.runShellCmd(pkexecNeeded, '/usr/local/bin/screenpad-' + this.TOOL_SUFFIX, ...params);
+        return this.runShellCmd(pkexecNeeded, '/usr/local/bin/screenpad-test', ...params);
     }
 
     /**
@@ -31,11 +49,11 @@ export class ShellTools {
     runShellCmd(pkexecNeeded, cmd, ...params) {
         return new Promise((resolve, reject) => {
             let args = [cmd].concat(params);
-    
+
             if (pkexecNeeded) {
                 args.unshift(this.PKEXEC);
             }
-    
+
             let launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.STDOUT_PIPE);
             launcher.set_cwd(this.EXTENSIONDIR);
             let proc;
@@ -45,7 +63,7 @@ export class ShellTools {
                 reject(e);
                 return;
             }
-    
+
             let stdoutStream = new Gio.DataInputStream({
                 base_stream: proc.get_stdout_pipe(),
                 close_base_stream: true,
@@ -58,10 +76,10 @@ export class ShellTools {
                     reject();
                     return;
                 }
-    
+                
                 let exitCode = proc.get_exit_status();
                 let [stdout, _length] = stdoutStream.read_upto('', 0, null);
-    
+
                 resolve({
                     ok: exitCode === 0,
                     exitCode,
@@ -73,19 +91,18 @@ export class ShellTools {
 }
 
 export const ReturnCodes = Object.freeze({
-    EXIT_SUCCESS : 0,
-    EXIT_INVALID_ARGUMENT : 1,
-    EXIT_FAILURE : 2,
-    EXIT_NEEDS_UPDATE : 3,
-    EXIT_NOT_INSTALLED : 4,
-    EXIT_NEEDS_ROOT : 5,
+    EXIT_SUCCESS: 0,
+    EXIT_INVALID_ARGUMENT: 1,
+    EXIT_FAILURE: 2,
+    EXIT_NEEDS_UPDATE: 3,
+    EXIT_NOT_INSTALLED: 4,
+    EXIT_NEEDS_ROOT: 5,
 });
 
 export class SetupUtils {
-
     /**
-     * 
-     * @param {Extension} extension 
+     *
+     * @param {Extension} extension
      */
     constructor(extension) {
         this.EXTENSIONDIR = extension.dir.get_path();
@@ -160,7 +177,7 @@ export class SetupUtils {
                 } catch (e) {
                     exitCode = e.code;
                 }
-    
+
                 resolve(exitCode);
             });
         });
