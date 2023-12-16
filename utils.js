@@ -63,7 +63,6 @@ export class ShellTools {
                 reject(e);
                 return;
             }
-
             let stdoutStream = new Gio.DataInputStream({
                 base_stream: proc.get_stdout_pipe(),
                 close_base_stream: true,
@@ -177,7 +176,6 @@ export class SetupUtils {
                 } catch (e) {
                     exitCode = e.code;
                 }
-
                 resolve(exitCode);
             });
         });
