@@ -11,7 +11,7 @@ This is a fork of [mjollnir14/gnome-shell-extension-zenbook-duo](https://github.
 | -------- | :--------: | ------------------------------------------ | ------------ |
 | UX481FLY |     ✅     |                                            | @laurinneff  |
 | UX482EA  |     ✅     | without NVIDIA GPU                         | @jibsaramnim |
-| UX482EG  |     ❔     | with NVIDIA GPU                            |              |
+| UX482EG  |     ✅     | with NVIDIA GPU                            | @gnargle     |
 | UX8402   |     ✅     | without NVIDIA GPU, Ubuntu 23.04           | @allofmex    |
 
 <!-- Use ✅ for supported, ❔ for unknown/unconfirmed, ❌ for unsupported -->
