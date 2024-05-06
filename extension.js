@@ -5,6 +5,7 @@ import GLib from 'gi://GLib';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
+import * as Calendar from 'resource:///org/gnome/shell/ui/calendar.js';
 
 import * as Keybindings from './keybindings.js';
 import {ShellTools} from './utils.js';
@@ -373,7 +374,7 @@ export default class ZenbookDuoExtension extends Extension {
     _showNotification(title, message, btnText, btnAction) {
         if (this._notifSource == null) {
             // We have to prepare this only once
-            this._notifSource = new MessageTray.SystemNotificationSource();
+            this._notifSource = new MessageTray.getSystemSource();
             // Take care of note leaving unneeded sources
             this._notifSource.connect('destroy', () => {
                 this._notifSource = null;
