@@ -5,7 +5,6 @@ import GLib from 'gi://GLib';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
-import * as Calendar from 'resource:///org/gnome/shell/ui/calendar.js';
 
 import * as Keybindings from './keybindings.js';
 import {ShellTools} from './utils.js';
@@ -372,20 +371,29 @@ export default class ZenbookDuoExtension extends Extension {
 
     // Shamelessly stolen from https://github.com/RaphaelRochet/arch-update/blob/3d3f5927ec0d33408a802d6d38af39c1b9b6f8e5/extension.js#L473-L497
     _showNotification(title, message, btnText, btnAction) {
-        if (this._notifSource == null) {
-            // We have to prepare this only once
-            this._notifSource = new MessageTray.getSystemSource();
-            // Take care of note leaving unneeded sources
-            this._notifSource.connect('destroy', () => {
-                this._notifSource = null;
-            });
-            Main.messageTray.add(this._notifSource);
-        }
-        let notification = null;
-        notification = new MessageTray.Notification(this._notifSource, title, message);
-        if (btnText) notification.addAction(btnText, btnAction.bind(this));
-        notification.setTransient(true);
-        this._notifSource.showNotification(notification);
+        // Destroy previous notification if still there
+		if (this._notification != null && this._notification) {
+			this._notification.destroy(MessageTray.NotificationDestroyedReason.REPLACED);
+		}
+		// Prepare a notification Source with our name and icon
+		// It looks like notification Sources are destroyed when empty so we check every time
+		if (this._notifSource == null) {
+			// We have to prepare this only once
+			this._notifSource = new MessageTray.Source({
+				title: "Zenpad Screen extension",
+			});
+			// Take care of not leaving unneeded sources
+			this._notifSource.connect('destroy', ()=>{this._notifSource = null;});
+			Main.messageTray.add(this._notifSource);
+		}
+		// Creates a new notification
+		this._notification = new MessageTray.Notification({
+			source: this._notifSource,
+			title: title,
+			body: message
+		});
+		this._notification.connect('destroy', ()=>{this._notification = null;});
+		this._notifSource.addNotification(this._notification);
     }
 
     async _getBrightness() {
