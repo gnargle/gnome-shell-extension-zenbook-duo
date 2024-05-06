@@ -369,7 +369,7 @@ export default class ZenbookDuoExtension extends Extension {
         });
     }
 
-    // Shamelessly stolen from https://github.com/RaphaelRochet/arch-update/blob/3d3f5927ec0d33408a802d6d38af39c1b9b6f8e5/extension.js#L473-L497
+    // Shamelessly stolen from https://github.com/RaphaelRochet/arch-update/extension.js
     _showNotification(title, message, btnText, btnAction) {
         // Destroy previous notification if still there
 		if (this._notification != null && this._notification) {
