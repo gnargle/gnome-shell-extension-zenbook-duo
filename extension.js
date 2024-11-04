@@ -5,7 +5,6 @@ import GLib from 'gi://GLib';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
-import * as Calendar from 'resource:///org/gnome/shell/ui/calendar.js';
 
 import * as Keybindings from './keybindings.js';
 import {ShellTools} from './utils.js';
