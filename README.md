@@ -19,15 +19,21 @@ This is a fork of [mjollnir14/gnome-shell-extension-zenbook-duo](https://github.
 ## Installation
 
 This extension requires the [asus-wmi-screenpad](https://github.com/Plippo/asus-wmi-screenpad) kernel module, please install this first.
+
 ```shell
-wget https://github.com/allofmex/gnome-shell-extension-zenbook-duo/archive/refs/tags/v7.zip -O gnome-shell-extension-zenbook-duo.zip
-unzip ./gnome-shell-extension-zenbook-duo.zip
-rm ./gnome-shell-extension-zenbook-duo.zip
-cd gnome-shell-extension-zenbook-duo-7
+curl -L -o gnome-shell-extension-zenbook-duo.tar.gz $(curl -s https://api.github.com/repos/allofmex/gnome-shell-extension-zenbook-duo/releases/latest | grep "tarball_url" | awk '{ print $2 }' | sed 's/,$//' | sed 's/"//g')
+mkdir gnome-shell-extension-zenbook-duo
+tar --extract --file=gnome-shell-extension-zenbook-duo.tar.gz --strip-components=1 --directory ./gnome-shell-extension-zenbook-duo
+rm ./gnome-shell-extension-zenbook-duo.tar.gz
+cd gnome-shell-extension-zenbook-duo
 make install
 ```
 
-Logout/login
+Make sure to 
+**logout** and **login**!
+
+Open "Extension" app, enable gnome-shell-extension-zenbook-duo.
+(In case of problems try another logout -> login)
 
 
 ## Usage
@@ -39,11 +45,11 @@ It will **not** link the brightness hardware keys to Screenpad display (as of no
 
 ## Debugging
 
-Test if brightness can be set to screenpad at all
+To test if asus-wmi-screenpad dependency is working, run the following in a terminal
 
 ```
 echo 255 > '/sys/class/leds/asus::screenpad/brightness'
 ```
 
-This should have set screenpad brightness to max (or less if you replace 255 by lower value). If this is not working, check the kernel module mentioned above.
+This should have set screenpad brightness to max (or less if you replace 255 by lower value). If this is not working, check the kernel module setup of asus-wmi-screenpad.
 
