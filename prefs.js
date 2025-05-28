@@ -6,6 +6,7 @@ import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/ex
 
 export default class ZenbookDuoExtPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
+		window.set_default_size(1000, 400);
         window._settings = this.getSettings('org.gnome.shell.extensions.zenbook-duo');
         window.add(this.getPrefsWidget());
     }
