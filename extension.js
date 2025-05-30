@@ -8,11 +8,9 @@ import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
 
 import * as Keybindings from './keybindings.js';
 import {ShellTools} from './utils.js';
-import {SetupUtils} from './utils.js';
-import {ReturnCodes as InstallerCodes} from './utils.js';
+import {SetupUtils} from './setup-utils.js';
+import {ReturnCodes as InstallerCodes} from './setup-utils.js';
 import {FeatureIndicator} from './featureindicator.js';
-
-const ScreenpadSysfsPath = '/sys/class/leds/asus::screenpad';
 
 export default class ZenbookDuoExtension extends Extension {
     constructor(metadata) {
@@ -22,24 +20,7 @@ export default class ZenbookDuoExtension extends Extension {
 
     enable() {
         if (this._firstRun) {
-            this._screenpadBrightnessFile = Gio.File.new_for_path(`${ScreenpadSysfsPath}/brightness`);
-            if (!this._screenpadBrightnessFile.query_exists(null)) {
-                this._showNotification(
-                    'The Screenpad brightness file does not exist',
-                    'Ensure the asus-wmi-screenpad module is installed and loaded and that your device is compatible with this module.',
-                    'Click here to see how to do this',
-                    function () {
-                        Gio.AppInfo.launch_default_for_uri_async(
-                            'https://github.com/Plippo/asus-wmi-screenpad#readme',
-                            null,
-                            null,
-                            null
-                        );
-                    }
-                );
-            } else {
-                this._checkInstalled();
-            }
+			this._checkInstalled();
 
             /*
                 This variable is kept between enabling/disabling (so that the extension doesn't check if the
@@ -296,81 +277,19 @@ export default class ZenbookDuoExtension extends Extension {
 //    _onSettingsChanged() {} // unused
 
     _checkInstalled() {
-        log('Checking if additional screenpad files are installed');
         let setupUtils = new SetupUtils(this);
         setupUtils.checkInstalled().then((result) => {
-            switch (result) {
-                case InstallerCodes.EXIT_SUCCESS:
-                    // Only check for the udev rule if the additional files are installed
-                    const udevRuleFile = Gio.File.new_for_path('/etc/udev/rules.d/99-screenpad.rules');
-                    if (udevRuleFile.query_exists(null)) {
-                        this._showNotification(
-                            'You still have the old udev rule on your system',
-                            "This rule was previously used to get write access on the brightness file, but it isn't needed anymore.",
-                            'Click here to see how to remove it',
-                            function () {
-                                Gio.AppInfo.launch_default_for_uri_async(
-                                    'https://github.com/laurinneff/gnome-shell-extension-zenbook-duo/blob/master/docs/permissions.md#removing-the-old-udev-rule',
-                                    null,
-                                    null,
-                                    null
-                                );
-                            }
-                        );
-                    }
-                    break;
-                case InstallerCodes.EXIT_NOT_INSTALLED:
-                    this._showNotification(
-                        'This extension requires additional configuration',
-                        "In order for this extension to work, it needs to install some files. You can undo this in the extension's settings.",
-                        'Click here to do this automatically',
-                        async function () {
-                            switch (await setupUtils.install()) {
-                                case InstallerCodes.EXIT_SUCCESS:
-                                    this._showNotification(
-                                        'Successfully installed files',
-                                        'The files have been installed successfully. You can now use the extension.'
-                                    );
-                                    break;
-                                case InstallerCodes.EXIT_FAILURE:
-                                    this._showNotification(
-                                        'Failed to install the files',
-                                        'The files could not be installed.'
-                                    );
-                                    break;
-                            }
-                        }
-                    );
-                    break;
-                case InstallerCodes.EXIT_NEEDS_UPDATE:
-                    this._showNotification(
-                        'The additional files for the Screenpad+ extension requires an update',
-                        'The extension has been updated, but the additional files need to be updated separately.',
-                        'Click here to do this automatically',
-                        async function () {
-                            switch (await setupUtils.install()) {
-                                case InstallerCodes.EXIT_SUCCESS:
-                                    this._showNotification(
-                                        'Successfully updated files',
-                                        'The files have been files successfully. You can now use the extension.'
-                                    );
-                                    break;
-                                case InstallerCodes.EXIT_FAILURE:
-                                    this._showNotification(
-                                        'Failed to update the files',
-                                        'The files could not be updated.'
-                                    );
-                                    break;
-                            }
-                        }
-                    );
-                    break;
-            }
+			if (result !== InstallerCodes.EXIT_SUCCESS) {
+				this._showNotification(
+					'Extension needs aditional configuration.',
+					'Please visit extension settings for further details'
+				);
+			}    
         });
     }
 
     // Shamelessly stolen from https://github.com/RaphaelRochet/arch-update/extension.js
-    _showNotification(title, message, btnText, btnAction) {
+    _showNotification(title, message) {
         // Destroy previous notification if still there
 		if (this._notification != null && this._notification) {
 			this._notification.destroy(MessageTray.NotificationDestroyedReason.REPLACED);
