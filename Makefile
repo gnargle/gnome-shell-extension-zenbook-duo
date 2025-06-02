@@ -1,9 +1,10 @@
-VERSION = 8
+VERSION = 9
 
 EXTENSION_INSTALL_DIR = "$(HOME)/.local/share/gnome-shell/extensions/zenbook-duo@laurinneff.ch"
 
 FILES += extension.js
 FILES += utils.js
+FILES += setup-utils.js
 FILES += keybindings.js
 FILES += featureindicator.js
 FILES += prefs.js
